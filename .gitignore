@@ -3,3 +3,4 @@ __pycache__/
 .ropeproject
 .env
 pyrightconfig.json
+node_modules
