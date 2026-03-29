@@ -60,6 +60,7 @@ services:
     container_name: tablemind_db
     networks:
       - app_net
+      - pgadmin_net
     environment:
       POSTGRES_USER: ${USER_DB}
       POSTGRES_PASSWORD: ${PASS_DB}
@@ -72,24 +73,14 @@ services:
       timeout: 3s
       retries: 5
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    env_file: ./.env
-    container_name: tablemind_pgadmin
-    networks:
-      - app_net
-    ports:
-      - "${PORT_PGAD}:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${MAIL_DB}
-      PGADMIN_DEFAULT_PASSWORD: ${PASS_DB}
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-
 networks:
   app_net:
     driver: bridge
     name: tablemind_network
+
+  pgadmin_net:
+    name: pgadmin_network
+    external: true
 
 volumes:
   uploads:
