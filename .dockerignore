@@ -1,0 +1,22 @@
+# Dependency folders (The most important ones)
+node_modules/
+**/node_modules/
+venv/
+.venv/
+__pycache__/
+
+# Build outputs
+.next/
+dist/
+out/
+build/
+
+# IDE & OS noise
+.git/
+.vscode/
+.idea/
+.DS_Store
+
+# Environment files
+.env
+.env.local
