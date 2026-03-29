@@ -299,6 +299,9 @@ async def process_job_async(job_id: str):
                             except Exception as model_error:
                                 logger.error(f"Error with model processing: {str(model_error)}")
                                 raise Exception(f"Model processing error: {str(model_error)}")
+
+                        except Exception as e:
+                            raise Exception(e)
                     
                         # Check for errors in the processed chunk
                         if "error" in processed_chunk:
