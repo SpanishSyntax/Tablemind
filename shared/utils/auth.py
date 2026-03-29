@@ -1,6 +1,9 @@
 import os
-from datetime import datetime, timedelta
-from passlib.context import CryptContext
+from datetime import datetime, timedelta, timezone
+
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, VerificationError
+
 from jose import jwt
 import uuid
 
@@ -8,19 +11,81 @@ KEY_TOKEN_HASHER = os.getenv("KEY_TOKEN_HASHER", "oneverylongandsupersecretpassw
 HASHER_ALGORITHM = os.getenv("HASHER_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1500"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_hasher = PasswordHasher(memory_cost=131072, time_cost=3, parallelism=2)
+token_hasher = PasswordHasher(memory_cost=65536, time_cost=1, parallelism=1)
+fast_hasher = PasswordHasher(memory_cost=16384, time_cost=1, parallelism=1)
 
-class PasswordService:
-    def __init__(self, password: str):
-        self.password = password
+class HashError(Exception):
+    """Base error for HashUtils."""
 
-    def hash_password(self) -> str:
-        """Hashes a password using bcrypt"""
-        return pwd_context.hash(self.password)
 
-    def verify_password(self, hashed_password: str) -> bool:
-        """Verifies a hashed password"""
-        return pwd_context.verify(self.password, hashed_password)
+class EmptyHashTarget(HashError):
+    """Empty input provided."""
+
+
+class HashMismatch(HashError):
+    """Value does not match hash."""
+
+
+class InvalidHashFormat(HashError):
+    """Stored hash is invalid or corrupted."""
+
+def hash_value(hasher: PasswordHasher, value: str) -> str:
+    if not value or not value.strip():
+        raise EmptyHashTarget("Cannot hash empty string")
+
+    try:
+        return hasher.hash(value)
+    except Exception as e:
+        raise HashError("Hash operation failed") from e
+
+
+def verify_value(hasher: PasswordHasher, value: str, hashed_value: str) -> None:
+    if not value or not value.strip():
+        raise EmptyHashTarget("Cannot verify empty string")
+    if not hashed_value or not hashed_value.strip():
+        raise EmptyHashTarget("Cannot verify empty string")
+
+    try:
+        hasher.verify(hashed_value, value)
+    except VerifyMismatchError:
+        raise HashMismatch("Hash verification failed")
+    except VerificationError:
+        raise InvalidHashFormat("Unknown or invalid hash format")
+    except Exception as e:
+        raise HashError("Hash operation failed") from e
+
+
+def hash_password(password: str) -> str:
+    """Hashes a password using the password context."""
+    return hash_value(password_hasher, password)
+
+
+def hash_token(token: str) -> str:
+    """Hashes a token using the token context."""
+    return hash_value(token_hasher, token)
+
+
+def hash_string(secret: str) -> str:
+    """Hashes a string using the fast context."""
+    return hash_value(fast_hasher, secret)
+
+
+def verify_password(password: str, hashed_password: str) -> None:
+    """Verifies a password using the password context."""
+    verify_value(password_hasher, password, hashed_password)
+    if password_hasher.check_needs_rehash(hashed_password):
+        raise HashError("Rehash of password needed.")
+
+
+def verify_token(token: str, hashed_token: str) -> None:
+    """Verifies a token using the token context."""
+    verify_value(token_hasher, token, hashed_token)
+
+
+def verify_string(secret: str, hashed_secret: str) -> None:
+    """Verifies a string using the fast context."""
+    verify_value(fast_hasher, secret, hashed_secret)
 
 class TokenService:
     def __init__(self, id: uuid.UUID, username: str):
@@ -29,7 +94,7 @@ class TokenService:
     
     def generate_tokens(self):
         """Generates both Access and Refresh JWT tokens"""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         access_expires = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         refresh_expires = now + timedelta(days=7)
 
