@@ -14,7 +14,7 @@ from shared.utils.crypt import CryptoUtils
 from shared.models.user import User_on_db, UserTier_on_db
 from shared.models.resources import Model_on_db, APIKey_on_db
 
-PASS_ROOT_USER = os.getenv("PASS_ROOT_USER", "A very safe root password")
+PASS_ROOT_USER = os.getenv("PASS_ROOT_USER", "safepass")
 KEY_FERNET_ENCRYPTION = os.getenv("KEY_FERNET_ENCRYPTION", "A very safe key").encode()
 KEY_API_GEMINI = os.getenv("KEY_API_GEMINI", "")
 
