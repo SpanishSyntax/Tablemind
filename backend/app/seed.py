@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.utils.auth import PasswordService
+from shared.utils.auth import hash_password, verify_password
 from shared.utils.text import TextUtils
 from shared.utils.crypt import CryptoUtils
 
@@ -71,7 +71,7 @@ class SeedDb:
                 "usertier": admin_tier.id,
                 "username": "root",
                 "email": "root@TableMind.com",
-                "password_hash": PasswordService(TextUtils().sanitize_text(PASS_ROOT_USER)).hash_password(),
+                "password_hash": hash_password(PASS_ROOT_USER),
                 "profile_picture": "",
                 "biography":"",
                 "media_usage": 0
