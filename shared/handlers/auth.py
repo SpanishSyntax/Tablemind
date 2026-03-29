@@ -1,12 +1,12 @@
 import os
 import uuid
 from pydantic import EmailStr, SecretStr
-from fastapi import HTTPException, Response
+from fastapi import HTTPException, Response, status
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.auth.auth import CurrentUser
-from shared.utils.auth import PasswordService, TokenService
+from shared.utils.auth import TokenService, hash_password, verify_password, HashError, HashMismatch, InvalidHashFormat
 from shared.utils.text import TextUtils
 
 from shared.ops.user import UsersDb
@@ -22,25 +22,26 @@ class AuthHandler:
 
 
 
-    async def register(self, username_api:str, email_api:EmailStr, password_api:SecretStr) -> ResponseRegister:
+    async def register(self, username_api: str, email_api: EmailStr, password_api: SecretStr) -> ResponseRegister:
         username = self.textutils.sanitize_text(username_api)
-        password = PasswordService(self.textutils.sanitize_text(password_api.get_secret_value())).hash_password()
         email = self.textutils.is_valid_and_safe_email(email_api)
 
         dup = await self.userondb.check_user_duplicity(username, email)
         if dup:
-            raise HTTPException(status_code=400, detail="No se pudo completar el registro.")
-        await self.userondb.create_user_entry(username, email, password)
+            raise HTTPException(status_code=400, detail="El usuario o email ya existe.")
+
+        hashed_password = hash_password(password_api.get_secret_value())
+
+        await self.userondb.create_user_entry(username, email, hashed_password)
+    
         return ResponseRegister(
             username=username,
             email=email
         )
 
-
-
     async def UserDelete(self, username_api:str, email_api:EmailStr, password_api:SecretStr) -> ResponseDelete:
         username = self.textutils.sanitize_text(username_api)
-        password = PasswordService(self.textutils.sanitize_text(password_api.get_secret_value())).hash_password()
+        password = hash_password(password_api.get_secret_value())
         email = self.textutils.is_valid_and_safe_email(email_api)
 
         await self.userondb.delete_user_entry(username=username, email=email, passwd=password)
@@ -68,7 +69,7 @@ class AuthHandler:
 
 
     async def UserUpdatePassword(self, current_user: CurrentUser, password_api:SecretStr) -> ResponseUpdate:
-        password = PasswordService(self.textutils.sanitize_text(password_api.get_secret_value())).hash_password()
+        password = hash_password(password_api.get_secret_value())
 
         await self.userondb.update_user_entry(id=current_user.id, password_hash=password)
         return ResponseUpdate(message='Contraseña actualizada')
@@ -108,13 +109,27 @@ class AuthHandler:
     async def login(self, username_api: str, password_api: SecretStr, response: Response) -> ResponseLogin:
         user = await self.userondb.get_user_entry_for_login(username_api)
 
-        fake_hash = "$2b$12$" + "a" * 53
-        password_matches = PasswordService(password_api.get_secret_value()).verify_password(
-            user.password_hash if user else fake_hash
-        )
+        fake_hash = "$argon2id$v=19$m=65536,t=3,p=4$vS7p6p6p6p6p6p6p6p6p6g$6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6p6"
 
-        if user is None or not password_matches:
-            raise HTTPException(status_code=401, detail="Invalid credentials")
+        try:
+            verify_password(
+                password_api.get_secret_value(), 
+                user.password_hash if user else fake_hash
+            )
+        
+            if user is None:
+                raise HashMismatch("User not found")
+
+        except (HashMismatch, InvalidHashFormat):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail="Invalid credentials"
+            )
+        except HashError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal authentication error"
+            )
 
         access_token, refresh_token = TokenService(user.id, user.username).generate_tokens()
 
@@ -122,14 +137,14 @@ class AuthHandler:
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure=PRODUCTION_MODE,  # ⚠️ Set to True in production
+            secure=PRODUCTION_MODE,
             samesite="lax",
             max_age=60 * 60 * 24 * 7,
         )
 
         return ResponseLogin(
             access_token=access_token,
-            username=username_api
+            username=user.username  # Use the username from DB for consistency
         )
 
 
