@@ -1,28 +1,33 @@
-# Stage 1: Build the Next.js app
-FROM node:20 AS builder
+# Stage 1: Build
+FROM node:20-slim AS builder
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable # Faster way to get pnpm in Node 20
 
-WORKDIR /tablemind
+WORKDIR /app
 
-# Install pnpm manually
-RUN npm install -g pnpm
-
-# Copy dependencies and install only production dependencies
-COPY ./frontend/tablemind/pnpm-lock.yaml ./frontend/tablemind/package.json ./
+# Only copy lockfile and package.json first for layer caching
+COPY ./frontend/tablemind/package.json ./frontend/tablemind/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
+# IMPORTANT: Ensure you have a .dockerignore with 'node_modules' 
+# to prevent the next line from crashing
 COPY ./frontend/tablemind ./
 RUN pnpm build
 
-# Stage 2: Run the app
-FROM node:20 AS runner
+# Stage 2: Run (using a smaller image)
+FROM node:20-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
 
-WORKDIR /tablemind
-
-# Copy the standalone output
-COPY --from=builder /tablemind/.next/standalone ./
-COPY --from=builder /tablemind/public ./public
-COPY --from=builder /tablemind/.next/static ./.next/static
+# The standalone folder includes a minimal node_modules
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
+ENV PORT=3000
+# Next.js standalone uses 'hostname' by default; 0.0.0.0 is needed for Docker
+ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
