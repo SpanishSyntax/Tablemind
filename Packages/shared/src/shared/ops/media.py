@@ -8,6 +8,7 @@ from fastapi import HTTPException, UploadFile
 from shared_models import File, FileType
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from shared_schemas import (
     ResponseMessage,
@@ -22,7 +23,7 @@ class MediaDb:
         """Generate a hash for the file and check if it already exists in the database"""
         try:
             result = await self.db.execute(
-                select(File).where(File.filehash == filehash, File.user_id == owner)
+                select(File).options(selectinload(File.type)).where(File.filehash == filehash, File.user_id == owner)
             )
             media = result.scalar_one_or_none()
             return media
@@ -36,7 +37,7 @@ class MediaDb:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
-                select(File).where(
+                select(File).options(selectinload(File.type)).where(
                     File.id == id,
                     File.user_id == owner,
                 )
@@ -54,7 +55,7 @@ class MediaDb:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
-                select(File).where(
+                select(File).options(selectinload(File.type)).where(
                     File.user_id == owner,
                 )
             )
@@ -109,7 +110,7 @@ class MediaDb:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
-                select(File).where(
+                select(File).options(selectinload(File.type)).where(
                     File.id == id,
                     File.user_id == owner,
                 )
@@ -145,7 +146,7 @@ class MediaDb:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
-                select(File).where(
+                select(File).options(selectinload(File.type)).where(
                     File.id == id,
                     File.user_id == owner,
                 )
