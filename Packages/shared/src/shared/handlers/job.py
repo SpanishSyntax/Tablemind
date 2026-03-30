@@ -76,7 +76,7 @@ class JobHandler:
         handling_fee = self.userdata.tier.priority_level
 
         full_path = os.path.join(self.media.filepath, self.media.filename)
-        self.df = self.jobutils.load_dataframe(full_path, self.media.type)
+        self.df = self.jobutils.load_dataframe(full_path, self.media.type.extension)
 
         if granularity == GranularityLevel.PER_CELL and not focus_column:
             raise HTTPException(
