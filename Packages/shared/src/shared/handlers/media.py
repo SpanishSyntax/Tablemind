@@ -18,7 +18,11 @@ class MediaHandler:
     def __init__(self, db: AsyncSession, upload_dir: str, current_user: CurrentUser):
         self.db = db
         self.path = upload_dir
-        self.user = current_user
+
+        if isinstance(current_user, str):
+            self.user = CurrentUser(id=current_user)
+        else:
+            self.user = current_user
 
         self.mediautils = MediaUtils()
         self.textutils = TextUtils()
