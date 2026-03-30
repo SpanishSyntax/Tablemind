@@ -79,7 +79,7 @@ class MediaDb:
         """Create an entry in the database for the uploaded file"""
         media = File(
             user_id=owner,
-            type=filetype.label,
+            type=filetype,
             filename=filename,
             filepath=filepath,
             filehash=filehash,
