@@ -1,0 +1,29 @@
+# MODE
+PRODUCTION_MODE=false
+LOGLEVEL=debug
+
+# DB
+POSTGRES_USER=tablemind_user
+POSTGRES_DB=tablemind
+
+# PORTS
+PORT_FRONT=2345
+PORT_AUTH=2345
+PORT_CORE=2345
+
+# CORS DIRECT API
+PUBLIC_ORIGINS=https://frontend1.com,https://frontend2.com,http://localhost:5173
+
+# CORS FRONTEND ONLY
+PRIVATE_ORIGINS=https://frontend1.com,https://frontend2.com,http://localhost:5173
+
+# TOKENS
+JWT_ASYMETRIC_ALGORITHM=EdDSA
+JWT_EXPIRE_MINUTES_ACCESS=1440
+JWT_EXPIRE_MINUTES_REFRESH=10080
+
+# STORAGE
+BASE_UPLOAD_DIR=/app/uploads
+
+PASS_ROOT_USER=somepass
+KEY_API_GEMINI=sometoken
