@@ -118,7 +118,7 @@ def upgrade() -> None:
 
         """Populate default tiers"""
         result = session.execute(
-            select(Model_on_db).where(Model_on_db.name == "Google Gemini 2 flash")
+            select(Model_on_db).where(Model_on_db.name == "Google Gemini 2.0 Flash")
         )
         model = result.scalar_one_or_none()
         if not model:
