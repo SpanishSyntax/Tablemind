@@ -73,10 +73,10 @@ class JobHandler:
                 status_code=404, detail="No se encontró prompt, media o model"
             )
 
-        handling_fee = self.userdata.user_type.price_per_job
+        handling_fee = self.userdata.tier.price_per_job
 
         full_path = os.path.join(self.media.filepath, self.media.filename)
-        self.df = self.jobutils.load_dataframe(full_path, self.media.media_type)
+        self.df = self.jobutils.load_dataframe(full_path, self.media.type)
 
         if granularity == GranularityLevel.PER_CELL and not focus_column:
             raise HTTPException(
@@ -254,7 +254,7 @@ class JobHandler:
                 estimated_output_tokens=self.output_tokens,
                 cost_per_1m_input=self.model.cost_per_1m_input,
                 cost_per_1m_output=self.model.cost_per_1m_output,
-                handling_fee=self.userdata.user_type.price_per_job
+                handling_fee=self.userdata.tier.priority_level
                 if self.userdata and hasattr(self.userdata, "user_type")
                 else 0,
                 estimated_cost=self.cost_usd,
