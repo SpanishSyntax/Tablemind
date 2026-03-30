@@ -5,7 +5,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from shared_db import SessionAsync, init_db
 from shared_utils import BaseDomainError, configure_logging, get_logger
 
 from routers import router_job, router_media, router_model, router_prompt
@@ -52,14 +51,6 @@ else:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    async with SessionAsync() as session:
-        seeder = SeedDb(session)
-        await seeder.seed_usertypes()
-        await seeder.seed_root_user()
-        await seeder.seed_models()
-        await seeder.seed_api_keys()
-    
     yield  # The app runs while this is suspended here
 
 ##############################################################################################
