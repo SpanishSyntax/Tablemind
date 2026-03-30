@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 from typing import Optional, Sequence
 
 from fastapi import HTTPException
@@ -32,9 +32,9 @@ class ChunkDb:
 
     async def create_chunk_entry(
         self,
-        model_id: uuid.UUID,
-        prompt_id: uuid.UUID,
-        media_id: uuid.UUID,
+        model_id: UUID,
+        prompt_id: UUID,
+        media_id: UUID,
         chunk_status: JobStatus,
         cost_estimate_usd: int,
         input_token_count: int,
@@ -56,7 +56,7 @@ class ChunkDb:
                 status_code=500, detail=f"Error creando chunk en db: {str(e)}"
             )
 
-    async def get_chunk_entry(self, id: uuid.UUID) -> Chunk_on_db:
+    async def get_chunk_entry(self, id: UUID) -> Chunk_on_db:
         """Get an entry in the database for the chunk"""
         try:
             result = await self.db.execute(
@@ -91,10 +91,10 @@ class ChunkDb:
 
     async def update_chunk_entry(
         self,
-        id: uuid.UUID,
-        model_id: Optional[uuid.UUID] = None,
-        prompt_id: Optional[uuid.UUID] = None,
-        media_id: Optional[uuid.UUID] = None,
+        id: UUID,
+        model_id: Optional[UUID] = None,
+        prompt_id: Optional[UUID] = None,
+        media_id: Optional[UUID] = None,
         chunk_status: Optional[JobStatus] = None,
         cost_estimate_usd: Optional[int] = None,
         input_token_count: Optional[int] = None,
@@ -108,7 +108,7 @@ class ChunkDb:
                     Chunk_on_db.id == id, Chunk_on_db.user_id == self.user
                 )
             )
-            chunk = result.scalar_one_or_none()
+            chunk  = result.scalar_one_or_none()
             if not chunk:
                 raise HTTPException(status_code=400, detail="El chunk no existe.")
         except Exception as e:
@@ -143,7 +143,7 @@ class ChunkDb:
                 status_code=500, detail=f"Error actualizando el chunk: {str(e)}"
             )
 
-    async def delete_chunk_entry(self, id: uuid.UUID) -> None:
+    async def delete_chunk_entry(self, id: UUID) -> None:
         """Delete an entry in the database for the chunk"""
         try:
             result = await self.db.execute(

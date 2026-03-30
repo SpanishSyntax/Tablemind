@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 from typing import Optional
 
 from fastapi import HTTPException
@@ -56,7 +56,7 @@ class UsersDb:
         result = await self.db.execute(select(User).where(User.username == username))
         return result.scalar_one_or_none()
 
-    async def get_user_tier(self, user_id: uuid.UUID) -> Optional[str]:
+    async def get_user_tier(self, user_id: UUID) -> Optional[str]:
         """Returns the name of the user's tier by user ID in a single query."""
         result = await self.db.execute(
             select(UserTier.label)
@@ -72,16 +72,16 @@ class UsersDb:
                 status_code=404, detail="Tipo de usuario o usuario no encontrados"
             )
 
-    async def get_user_entry(self, user_id: uuid.UUID) -> Optional[User]:
+    async def get_user_entry(self, user_id: UUID) -> Optional[User]:
         """Returns the tier of a user by ID."""
         result = await self.db.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
     async def update_user_entry(
         self,
-        id: uuid.UUID,
+        id: UUID,
         username: Optional[str] = None,
-        usertier: Optional[uuid.UUID] = None,
+        usertier: Optional[UUID] = None,
         email: Optional[str] = None,
         password_hash: Optional[str] = None,
         profile_picture: Optional[str] = None,

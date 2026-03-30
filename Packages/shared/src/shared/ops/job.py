@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 from typing import Optional, Sequence
 
 from fastapi import HTTPException
@@ -32,9 +32,9 @@ class JobDb:
 
     async def create_job_entry(
         self,
-        model_id: uuid.UUID,
-        prompt_id: uuid.UUID,
-        media_id: uuid.UUID,
+        model_id: UUID,
+        prompt_id: UUID,
+        media_id: UUID,
         job_status: JobStatus,
         cost_estimate_usd: int,
         input_token_count: int,
@@ -64,7 +64,7 @@ class JobDb:
                 status_code=500, detail=f"Error creando job en db: {str(e)}"
             )
 
-    async def get_job_entry(self, id: uuid.UUID) -> Job_on_db:
+    async def get_job_entry(self, id: UUID) -> Job_on_db:
         """Get an entry in the database for the job"""
         try:
             result = await self.db.execute(
@@ -99,10 +99,10 @@ class JobDb:
 
     async def update_job_entry(
         self,
-        id: uuid.UUID,
-        model_id: Optional[uuid.UUID] = None,
-        prompt_id: Optional[uuid.UUID] = None,
-        media_id: Optional[uuid.UUID] = None,
+        id: UUID,
+        model_id: Optional[UUID] = None,
+        prompt_id: Optional[UUID] = None,
+        media_id: Optional[UUID] = None,
         job_status: Optional[JobStatus] = None,
         cost_estimate_usd: Optional[int] = None,
         input_token_count: Optional[int] = None,
@@ -151,7 +151,7 @@ class JobDb:
                 status_code=500, detail=f"Error actualizando el job: {str(e)}"
             )
 
-    async def delete_job_entry(self, id: uuid.UUID) -> None:
+    async def delete_job_entry(self, id: UUID) -> None:
         """Delete an entry in the database for the job"""
         try:
             result = await self.db.execute(

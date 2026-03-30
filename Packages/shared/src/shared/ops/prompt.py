@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 from datetime import datetime, timezone
 from typing import Optional, Sequence
 
@@ -31,7 +31,7 @@ class PromptDb:
                 status_code=500, detail=f"Error adquiriendo prompt desde db: {str(e)}"
             )
 
-    async def get_prompt_entry(self, id: uuid.UUID) -> Prompt_on_db:
+    async def get_prompt_entry(self, id: UUID) -> Prompt_on_db:
         """Get an entry in the database for the prompt"""
         try:
             result = await self.db.execute(
@@ -83,7 +83,7 @@ class PromptDb:
             )
 
     async def update_prompt_entry(
-        self, id: uuid.UUID, prompt_text: str, hash: str
+        self, id: UUID, prompt_text: str, hash: str
     ) -> Prompt_on_db:
         """Update an entry in the database for a prompt"""
         try:
@@ -114,7 +114,7 @@ class PromptDb:
                 status_code=500, detail=f"Error actualizando el prompt: {str(e)}"
             )
 
-    async def delete_prompt_entry(self, id: uuid.UUID) -> None:
+    async def delete_prompt_entry(self, id: UUID) -> None:
         """Delete an entry in the database for the prompt"""
         try:
             result = await self.db.execute(

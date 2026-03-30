@@ -1,4 +1,4 @@
-import uuid
+from uuid import UUID
 from typing import Sequence
 
 from fastapi import HTTPException
@@ -12,7 +12,7 @@ class ModelDb:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def get_model_entry(self, id: uuid.UUID) -> Model_on_db:
+    async def get_model_entry(self, id: UUID) -> Model_on_db:
         """Get an entry in the database for the model"""
         try:
             result = await self.db.execute(

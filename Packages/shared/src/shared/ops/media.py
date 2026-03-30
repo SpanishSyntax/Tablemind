@@ -1,5 +1,5 @@
 import os
-import uuid
+from uuid import UUID
 from datetime import datetime, timezone
 from typing import Optional, Sequence
 
@@ -18,7 +18,7 @@ class MediaDb:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def check_duplicity(self, owner: uuid.UUID, filehash: str) -> Optional[File]:
+    async def check_duplicity(self, owner: UUID, filehash: str) -> Optional[File]:
         """Generate a hash for the file and check if it already exists in the database"""
         try:
             result = await self.db.execute(
@@ -32,7 +32,7 @@ class MediaDb:
                 detail=f"Error revisando duplicidad de archivo: {str(e)}",
             )
 
-    async def get_media_entry(self, id: uuid.UUID, owner: uuid.UUID) -> File:
+    async def get_media_entry(self, id: UUID, owner: UUID) -> File:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
@@ -50,7 +50,7 @@ class MediaDb:
                 status_code=500, detail=f"Error adquiriendo media desde db: {str(e)}"
             )
 
-    async def get_all_media_entries(self, owner: uuid.UUID) -> Sequence[File]:
+    async def get_all_media_entries(self, owner: UUID) -> Sequence[File]:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
@@ -70,7 +70,7 @@ class MediaDb:
 
     async def create_media_entry(
         self,
-        owner: uuid.UUID,
+        owner: UUID,
         filetype: FileType,
         filename: str,
         filepath: str,
@@ -98,8 +98,8 @@ class MediaDb:
 
     async def update_media_entry(
         self,
-        id: uuid.UUID,
-        owner: uuid.UUID,
+        id: UUID,
+        owner: UUID,
         filetype: Optional[FileType] = None,
         filename: Optional[str] = None,
         filepath: Optional[str] = None,
@@ -140,7 +140,7 @@ class MediaDb:
                 status_code=500, detail=f"Error actualizando el archivo: {str(e)}"
             )
 
-    async def delete_media_entry(self, id: uuid.UUID, owner: uuid.UUID) -> None:
+    async def delete_media_entry(self, id: UUID, owner: UUID) -> None:
         """Create an entry in the database for the uploaded file"""
         try:
             result = await self.db.execute(
@@ -170,7 +170,7 @@ class MediaDb:
 class MediaDisk:
     async def save_file(
         self,
-        user_id: uuid.UUID,
+        user_id: UUID,
         file: UploadFile,
         filename: str,
         filepath: str,
@@ -204,7 +204,7 @@ class MediaDisk:
 
     async def rename_file(
         self,
-        user_id: uuid.UUID,
+        user_id: UUID,
         old_filename: str,
         new_filename: str,
         filepath: str,
@@ -235,7 +235,7 @@ class MediaDisk:
 
     async def delete_file(
         self,
-        user_id: uuid.UUID,
+        user_id: UUID,
         filename: str,
         filepath: str,
     ) -> ResponseMessage:
