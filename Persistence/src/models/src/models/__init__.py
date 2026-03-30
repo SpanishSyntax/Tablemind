@@ -24,7 +24,6 @@ from .resources import (
     Prompt_on_db,
     Model_on_db,
     APIKey_on_db,
-    MediaType
 )
 
 __all__ = [
@@ -48,5 +47,4 @@ __all__ = [
     "Prompt_on_db",
     "Model_on_db",
     "APIKey_on_db",
-    "MediaType"
 ]
