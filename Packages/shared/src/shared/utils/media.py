@@ -38,19 +38,30 @@ class MediaUtils:
         return text
 
     def check_file_type(self, filetype: str) -> FileType:
-        # Get all valid mimetypes from the Enum
-        valid_mimetypes = [m.value[0] for m in FileTypesEnum]
-        
-        if not filetype or filetype not in valid_mimetypes:
+        matched_enum_member = next(
+            (m for m in FileTypesEnum if m.value[0] == filetype), 
+            None
+        )
+    
+        if not filetype or not matched_enum_member:
             raise HTTPException(
                 status_code=400,
                 detail=self._sanitize_for_json({
-                    "error": "Formato de archivo no soportado." if filetype else "Archivo sin formato.",
+                    "error": "Formato de archivo no soportado.",
                     "content_type": filetype,
-                    "allowed": [m.value for m in FileTypesEnum], # Sanitized via helper
+                    "allowed": [m.value for m in FileTypesEnum],
                 }),
             )
-        return FileType(name=filetype)
+
+        mime, ext, cat, size = matched_enum_member.value
+
+        return FileType(
+            label=matched_enum_member.name, # e.g., "EXCEL_2"
+            mime_type=mime,                 # e.g., "application/vnd..."
+            extension=ext,                  # e.g., ".xlsx"
+            category=cat,                   # e.g., "tabular"
+            max_size=size                   # e.g., Decimal('20971520')
+        )
 
     def determine_subpath(self, filetype: FileType):
         # Comparison logic remains the same, but ensure you compare against the Enum members
