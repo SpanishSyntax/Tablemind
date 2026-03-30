@@ -22,7 +22,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.hash == hash, Prompt_on_db.user_id == self.user.id
+                    Prompt_on_db.hash == hash, Prompt_on_db.user_id == self.user
                 )
             )
             return result.scalar_one_or_none()
@@ -34,9 +34,10 @@ class PromptDb:
     async def get_prompt_entry(self, id: UUID) -> Prompt_on_db:
         """Get an entry in the database for the prompt"""
         try:
+            user_id = self.user.id if hasattr(self.user, 'id') else self.user
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user.id
+                    Prompt_on_db.id == id, Prompt_on_db.user_id == user_id 
                 )
             )
             existing_prompt = result.scalar_one_or_none()
@@ -52,7 +53,7 @@ class PromptDb:
         """Get all promot entries in the database for the user"""
         try:
             result = await self.db.execute(
-                select(Prompt_on_db).where(Prompt_on_db.user_id == self.user.id)
+                select(Prompt_on_db).where(Prompt_on_db.user_id == self.user)
             )
             existing_prompt = result.scalars().all()
             if not existing_prompt:
@@ -89,7 +90,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user.id
+                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user
                 )
             )
             prompt = result.scalar_one_or_none()
@@ -119,7 +120,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user.id
+                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user
                 )
             )
             prompt = result.scalar_one_or_none()
