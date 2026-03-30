@@ -34,12 +34,18 @@ class Job_on_db(Base):
     __tablename__ = TargetTable.JOBS.table
     __table_args__ = {"schema": TargetTable.JOBS.schema}
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.USERS.fq_name}.id"), nullable=False)
-    model_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.MODELS.fq_name}.id"), nullable=False)
-    prompt_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("prompts.id"), nullable=False
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.USERS.fq_name}.id"), nullable=False
     )
-    media_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.FILES.fq_name}.id"), nullable=False)
+    model_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.MODELS.fq_name}.id"), nullable=False
+    )
+    prompt_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.PROMPTS.fq_name}.id"), nullable=False
+    )
+    media_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.FILES.fq_name}.id"), nullable=False
+    )
 
     job_status: Mapped[JobStatus] = mapped_column(PgEnum(JobStatus), nullable=False)
     cost_estimate_usd: Mapped[int] = mapped_column(nullable=False)
@@ -68,8 +74,12 @@ class Chunk_on_db(Base):
     __tablename__ = TargetTable.CHUNKS.table
     __table_args__ = {"schema": TargetTable.CHUNKS.schema}
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.USERS.fq_name}.id"), nullable=False)
-    job_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.JOBS.fq_name}.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.USERS.fq_name}.id"), nullable=False
+    )
+    job_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.JOBS.fq_name}.id"), nullable=False
+    )
 
     chunk_index: Mapped[int] = mapped_column(nullable=False)
     total_rows: Mapped[int] = mapped_column(nullable=False)

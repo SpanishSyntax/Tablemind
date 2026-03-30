@@ -30,7 +30,9 @@ class Prompt_on_db(Base):
     __tablename__ = TargetTable.PROMPTS.table
     __table_args__ = {"schema": TargetTable.PROMPTS.schema}
 
-    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.USERS.fq_name}.id"))
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.USERS.fq_name}.id")
+    )
 
     prompt_text: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
@@ -86,7 +88,9 @@ class APIKey_on_db(Base):
     __tablename__ = TargetTable.API_KEYS.table
     __table_args__ = {"schema": TargetTable.API_KEYS.schema}
 
-    model_id: Mapped[uuid.UUID] = mapped_column(ForeignKey(f"{TargetTable.MODELS.fq_name}.id"))
+    model_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(f"{TargetTable.MODELS.fq_name}.id")
+    )
     api_key: Mapped[str] = mapped_column(
         String(256), nullable=False, unique=True, index=True
     )
