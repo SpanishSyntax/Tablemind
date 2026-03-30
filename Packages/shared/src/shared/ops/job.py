@@ -21,7 +21,7 @@ class JobDb:
         try:
             result = await self.db.execute(
                 select(Job_on_db).where(
-                    Job_on_db.hash == hash, Job_on_db.user_id == self.user.id
+                    Job_on_db.hash == hash, Job_on_db.user_id == self.user
                 )
             )
             return result.scalar_one_or_none()
@@ -43,7 +43,7 @@ class JobDb:
     ) -> Job_on_db:
         """Create an entry in the database for the job"""
         job = Job_on_db(
-            user_id=self.user.id,
+            user_id=self.user,
             model_id=model_id,
             prompt_id=prompt_id,
             media_id=media_id,
@@ -69,7 +69,7 @@ class JobDb:
         try:
             result = await self.db.execute(
                 select(Job_on_db).where(
-                    Job_on_db.id == id, Job_on_db.user_id == self.user.id
+                    Job_on_db.id == id, Job_on_db.user_id == self.user
                 )
             )
             existing_job = result.scalar_one_or_none()
@@ -85,7 +85,7 @@ class JobDb:
         """Get all promot entries in the database for the user"""
         try:
             result = await self.db.execute(
-                select(Job_on_db).where(Job_on_db.user_id == self.user.id)
+                select(Job_on_db).where(Job_on_db.user_id == self.user)
             )
             existing_job = result.scalars().all()
             if not existing_job:
@@ -113,7 +113,7 @@ class JobDb:
         try:
             result = await self.db.execute(
                 select(Job_on_db).where(
-                    Job_on_db.id == id, Job_on_db.user_id == self.user.id
+                    Job_on_db.id == id, Job_on_db.user_id == self.user
                 )
             )
             job = result.scalar_one_or_none()
@@ -156,7 +156,7 @@ class JobDb:
         try:
             result = await self.db.execute(
                 select(Job_on_db).where(
-                    Job_on_db.id == id, Job_on_db.user_id == self.user.id
+                    Job_on_db.id == id, Job_on_db.user_id == self.user
                 )
             )
             job = result.scalar_one_or_none()

@@ -21,7 +21,7 @@ class ChunkDb:
         try:
             result = await self.db.execute(
                 select(Chunk_on_db).where(
-                    Chunk_on_db.hash == hash, Chunk_on_db.user_id == self.user.id
+                    Chunk_on_db.hash == hash, Chunk_on_db.user_id == self.user
                 )
             )
             return result.scalar_one_or_none()
@@ -43,7 +43,7 @@ class ChunkDb:
     ) -> Chunk_on_db:
         """Create an entry in the database for the chunk"""
         chunk = Chunk_on_db(
-            user_id=self.user.id,
+            user_id=self.user,
         )
         try:
             self.db.add(chunk)
@@ -61,7 +61,7 @@ class ChunkDb:
         try:
             result = await self.db.execute(
                 select(Chunk_on_db).where(
-                    Chunk_on_db.id == id, Chunk_on_db.user_id == self.user.id
+                    Chunk_on_db.id == id, Chunk_on_db.user_id == self.user
                 )
             )
             existing_chunk = result.scalar_one_or_none()
@@ -77,7 +77,7 @@ class ChunkDb:
         """Get all promot entries in the database for the user"""
         try:
             result = await self.db.execute(
-                select(Chunk_on_db).where(Chunk_on_db.user_id == self.user.id)
+                select(Chunk_on_db).where(Chunk_on_db.user_id == self.user)
             )
             existing_chunk = result.scalars().all()
             if not existing_chunk:
@@ -105,7 +105,7 @@ class ChunkDb:
         try:
             result = await self.db.execute(
                 select(Chunk_on_db).where(
-                    Chunk_on_db.id == id, Chunk_on_db.user_id == self.user.id
+                    Chunk_on_db.id == id, Chunk_on_db.user_id == self.user
                 )
             )
             chunk = result.scalar_one_or_none()
@@ -148,7 +148,7 @@ class ChunkDb:
         try:
             result = await self.db.execute(
                 select(Chunk_on_db).where(
-                    Chunk_on_db.id == id, Chunk_on_db.user_id == self.user.id
+                    Chunk_on_db.id == id, Chunk_on_db.user_id == self.user
                 )
             )
             chunk = result.scalar_one_or_none()
