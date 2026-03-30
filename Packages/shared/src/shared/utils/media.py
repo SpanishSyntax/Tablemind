@@ -64,18 +64,21 @@ class MediaUtils:
         )
 
     def determine_subpath(self, filetype: FileType):
-        # Comparison logic remains the same, but ensure you compare against the Enum members
-        # Note: filetype here is the Pydantic model from check_file_type
-        ft_name = filetype.label 
+        ft_label = filetype.label 
         
-        if ft_name in {FileTypesEnum.PNG.value[0], FileTypesEnum.JPEG.value[0]}:
+        if ft_label in {FileTypesEnum.PNG.name, FileTypesEnum.JPEG.name}:
             return "images"
-        elif ft_name == FileTypesEnum.MP4.value[0]:
+        elif ft_label == FileTypesEnum.MP4.name:
             return "videos"
-        elif ft_name in [m.value[0] for m in FileTypesEnum if m.value[2] == "tabular"]:
+        
+        elif filetype.category == "tabular":
             return "tables"
+            
         else:
-            raise HTTPException(status_code=400, detail="FileType desconocido.")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"FileType desconocido: label={ft_label}, cat={filetype.category}"
+            )
 
     def generate_file_hash(self, file: UploadFile) -> tuple[str, int]:
         try:
