@@ -4,8 +4,8 @@ import unicodedata
 from typing import List
 
 from fastapi import File, HTTPException, UploadFile
-from models import MediaType
-
+from shared_models import FileType
+from models import FileTypesEnum
 
 class MediaUtils:
     def sanitize_filename(self, text: str) -> str:
@@ -32,42 +32,44 @@ class MediaUtils:
 
         return text
 
-    def check_file_type(self, filetype: str) -> MediaType:
+    def check_file_type(self, filetype: str) -> FileType:
         if not filetype:
             raise HTTPException(
                 status_code=400,
                 detail={
                     "error": "Archivo sin formato.",
                     "content_type": filetype,
-                    "allowed": [m.value for m in MediaType],
+                    "allowed": [m.value for m in FileTypesEnum],
                 },
             )
-        elif filetype not in MediaType._value2member_map_:
+        elif filetype not in FileTypesEnum:
             raise HTTPException(
                 status_code=400,
                 detail={
                     "error": "Formato de archivo no soportado.",
                     "content_type": filetype,
-                    "allowed": [m.value for m in MediaType],
+                    "allowed": [m.value for m in FileTypesEnum],
                 },
             )
         else:
-            return MediaType(filetype)
+            return FileType(filetype)
 
-    def determine_subpath(self, filetype: MediaType):
-        if filetype in {MediaType.IMAGE_PNG, MediaType.IMAGE_JPEG}:
+    def determine_subpath(self, filetype: FileType):
+        if filetype in {FileTypesEnum.PNG, FileTypesEnum.JPEG}:
             return "images"
-        elif filetype == MediaType.VIDEO_MP4:
+        elif filetype == FileTypesEnum.MP4:
             return "videos"
         elif filetype in {
-            MediaType.TABLE_EXCEL,
-            MediaType.TABLE_OPEN,
-            MediaType.TABLE_CSV,
-            MediaType.TABLE_TSV,
+            FileTypesEnum.EXCEL_1,
+            FileTypesEnum.EXCEL_2,
+            FileTypesEnum.OPEN_EXCEL_1,
+            FileTypesEnum.OPEN_EXCEL_2,
+            FileTypesEnum.CSV,
+            FileTypesEnum.TSV,
         }:
             return "tables"
         else:
-            raise HTTPException(status_code=400, detail="MediaType desconocido.")
+            raise HTTPException(status_code=400, detail="FileType desconocido.")
 
     # def check_user_quota(self, filesize: int, user) -> None:
     #     if user.freespace + filesize > MediaQuota(user.user_type):
