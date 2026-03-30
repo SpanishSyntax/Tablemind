@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 import pandas as pd
 from fastapi import HTTPException
 from google import genai
-from models import Chunk_on_db, GranularityLevel, JobStatus, MediaType, Model_on_db
+from models import Chunk_on_db, FileTypesEnum, GranularityLevel, JobStatus, Model_on_db
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,18 +24,24 @@ class OutputVerbosity(Enum):
 
 
 class JobUtils:
-    def load_dataframe(self, filepath: str, media_type: MediaType) -> pd.DataFrame:
+    def load_dataframe(self, filepath: str, media_type: FileTypesEnum) -> pd.DataFrame:
         try:
-            if media_type == MediaType.TABLE_CSV:
+            if media_type == FileTypesEnum.CSV:
                 return pd.read_csv(filepath)
 
-            elif media_type == MediaType.TABLE_TSV:
+            elif media_type == FileTypesEnum.TSV:
                 return pd.read_csv(filepath, sep="\t")
 
-            elif media_type == MediaType.TABLE_EXCEL:
+            elif media_type == FileTypesEnum.EXCEL_1:
                 return pd.read_excel(filepath, engine="openpyxl")
 
-            elif media_type == MediaType.TABLE_OPEN:
+            elif media_type == FileTypesEnum.EXCEL_2:
+                return pd.read_excel(filepath, engine="openpyxl")
+
+            elif media_type == FileTypesEnum.OPEN_EXCEL_1:
+                return pd.read_excel(filepath, engine="odf")
+
+            elif media_type == FileTypesEnum.OPEN_EXCEL_2:
                 return pd.read_excel(filepath, engine="odf")
 
             else:
