@@ -19,7 +19,7 @@ def upgrade() -> None:
 
     # --- RESOURCES: MODELS ---
     op.create_table(
-        "models",
+        "ai_models",
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column("name", sa.String(), nullable=False),
         sa.Column("provider", sa.String(), nullable=False),
@@ -135,6 +135,6 @@ def downgrade() -> None:
     op.drop_table("chunks", schema="jobs")
     op.drop_table("jobs", schema="jobs")
     op.drop_table("api_keys", schema="resources")
-    op.drop_table("models", schema="resources")
+    op.drop_table("ai_models", schema="resources")
     op.drop_table("prompts", schema="resources")
 
