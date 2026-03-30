@@ -84,13 +84,6 @@ class JobHandler:
         except ValueError as e:
             raise HTTPException(status_code=400, detail=f"Unsupported file extension: {str(e)}")
 
-        if not self.prompt or not self.media or not self.model or not self.userdata:
-            raise HTTPException(
-                status_code=404, detail="No se encontró prompt, media o model"
-            )
-
-        self.df = self.jobutils.load_dataframe(full_path, media_enum)
-
         if granularity == GranularityLevel.PER_CELL and not focus_column:
             raise HTTPException(
                 status_code=400, detail="se requiere focus_column para modo PER_CELL"
