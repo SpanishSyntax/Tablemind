@@ -52,4 +52,4 @@ ENTRYPOINT ["/entrypoint_worker.sh"]
 # -----------------------------
 # 6. Run uvicorn
 # -----------------------------
-CMD ["sh", "-c", "uvicorn main:api --host 0.0.0.0 --port ${PORT_WORKER:-8000}"]
+CMD ["sh", "-c", "celery -A main.workers worker --loglevel=info"]
