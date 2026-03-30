@@ -15,25 +15,32 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("username", username);
-      formData.append("password", password);
+    setLoading(false); // Just a reminder to ensure loading state is handled
 
-      // Always use the API proxy configured in next.config.js
-      // This ensures the browser never tries to directly access the backend container
+    try {
       const apiUrl = "/api/auth/login";
+
+      const loginData = {
+        username: username,
+        password: password,
+      };
 
       const res = await fetch(apiUrl, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json", // 2. Explicitly set JSON header
+        },
+        body: JSON.stringify(loginData),
         credentials: "include"
       });
 
       const data = await res.json();
+
       if (!res.ok) {
-        setErrorMsg(data.detail || "Error al iniciar sesión");
+        const errorText = typeof data.detail === 'string' 
+          ? data.detail 
+          : "Error en los datos ingresados";
+        setErrorMsg(errorText);
       } else {
         localStorage.setItem("access_token", data.access_token);
         window.location.href = "/prompt";
@@ -41,8 +48,9 @@ export default function Login() {
     } catch (error) {
       console.error("Login error:", error);
       setErrorMsg("Error de conexión con el servidor.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
