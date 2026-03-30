@@ -75,6 +75,7 @@ class MediaDb:
         filename: str,
         filepath: str,
         filehash: str,
+        filesize: int,
     ) -> File:
         """Create an entry in the database for the uploaded file"""
         media = File(
@@ -83,6 +84,7 @@ class MediaDb:
             filename=filename,
             filepath=filepath,
             filehash=filehash,
+            filesize=filesize
         )
         try:
             self.db.add(media)

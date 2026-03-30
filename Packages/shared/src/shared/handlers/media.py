@@ -38,6 +38,7 @@ class MediaHandler:
         subpath = self.mediautils.determine_subpath(filetype)
         user_id = self.user.id if hasattr(self.user, 'id') else self.user
         filepath = os.path.join(self.path, str(user_id), subpath)
+        filesize = file.size or 0
 
         existing_file = await self.mediaondb.check_duplicity(user_id, filehash)
         if existing_file:
@@ -58,6 +59,7 @@ class MediaHandler:
             filename=filename,
             filepath=filepath,
             filehash=filehash,
+            filesize=filesize
         )
         file.file.seek(0)
         await self.mediaondisk.save_file(self.user.id, file, filename, media.filepath)
