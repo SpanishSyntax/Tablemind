@@ -1,11 +1,13 @@
 import hashlib
 import re
 import unicodedata
+from decimal import Decimal
 from typing import List
 
 from fastapi import File, HTTPException, UploadFile
-from shared_models import FileType
 from models import FileTypesEnum
+from shared_models import FileType
+
 
 class MediaUtils:
     def sanitize_filename(self, text: str) -> str:
@@ -52,7 +54,7 @@ class MediaUtils:
                 },
             )
         else:
-            return FileType(filetype)
+            return FileType(name=filetype)
 
     def determine_subpath(self, filetype: FileType):
         if filetype in {FileTypesEnum.PNG, FileTypesEnum.JPEG}:
@@ -109,12 +111,16 @@ class MediaUtils:
                     detail="No se pudo determinar el tipo de contenido del archivo.",
                 )
             if file.content_type not in allowed_types:
+                json_ready_allowed = [
+                    [item if not isinstance(item, Decimal) else int(item) for item in rule]
+                    for rule in allowed_types
+                ]
                 raise HTTPException(
                     status_code=422,
                     detail={
                         "error": "Tipo de archivo no permitido.",
                         "content_type": file.content_type,
-                        "allowed": allowed_types,
+                        "allowed": json_ready_allowed,
                     },
                 )
             return file
