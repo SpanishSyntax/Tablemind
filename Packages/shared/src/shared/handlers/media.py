@@ -32,7 +32,8 @@ class MediaHandler:
         filetype = self.mediautils.check_file_type(file.content_type)
         filehash, filesize = self.mediautils.generate_file_hash(file)
         subpath = self.mediautils.determine_subpath(filetype)
-        filepath = os.path.join(self.path, str(self.user.id), subpath)
+        user_id = self.user.id if hasattr(self.user, 'id') else self.user
+        filepath = os.path.join(self.path, str(user_id), subpath)
 
         existing_file = await self.mediaondb.check_duplicity(self.user.id, filehash)
         if existing_file:
@@ -80,7 +81,7 @@ class MediaHandler:
         media = await self.mediaondb.get_media_entry(id=id, owner=self.user.id)
         return FileResponse(
             path=f"{media.filepath}/{media.filename}",
-            media_type=media.media_type,
+            media_type=media.type,
             filename=media.filename,
         )
 
