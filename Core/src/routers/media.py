@@ -4,12 +4,13 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Form, Query, UploadFile
 from fastapi.responses import FileResponse
-from models import MediaType
 from shared import MediaHandler, MediaUtils, ResponseMedia
 from shared_db import get_session
 from shared_schemas import ResponseMessage
 from shared_utils import AccessContext, get_claims
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from models import FileTypesEnum
 
 router = APIRouter(tags=["Archivos"], prefix="/media")
 
@@ -48,10 +49,12 @@ async def upload_tabular(
     file: UploadFile = Depends(
         MediaUtils().validate_file(
             allowed_types=[
-                MediaType.TABLE_EXCEL,
-                MediaType.TABLE_OPEN,
-                MediaType.TABLE_CSV,
-                MediaType.TABLE_TSV,
+                FileTypesEnum.EXCEL_1.value,
+                FileTypesEnum.EXCEL_2.value,
+                FileTypesEnum.OPEN_EXCEL_1.value,
+                FileTypesEnum.OPEN_EXCEL_2.value,
+                FileTypesEnum.CSV.value,
+                FileTypesEnum.TSV.value,
             ]
         )
     ),
@@ -70,9 +73,9 @@ async def upload_media(
     file: UploadFile = Depends(
         MediaUtils().validate_file(
             allowed_types=[
-                MediaType.IMAGE_PNG,
-                MediaType.IMAGE_JPEG,
-                MediaType.VIDEO_MP4,
+                FileTypesEnum.PNG.value,
+                FileTypesEnum.JPEG.value,
+                FileTypesEnum.MP4.value,
             ]
         )
     ),

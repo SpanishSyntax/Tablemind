@@ -3,7 +3,7 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List, cast
 
 import pandas as pd
 from celery import Celery
@@ -154,23 +154,28 @@ async def check_job_status(
 @router.get("/results", response_model=Dict[str, Any])
 async def get_job_results(
     job_id: uuid.UUID = Query(..., description="Job ID"),
+    include_data: bool = Query(
+        False, description="Include sample of combined results"
+    ),  # Add this line
     ctx: AccessContext = Depends(),
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
     current_user = claims["sub"]
     job_handler = JobHandler(db=db, current_user=current_user)
+
     job = await job_handler.JobRead(job_id)
     chunks = await job_handler.GetJobChunks(job_id)
+
+    raw_results = getattr(job, "combined_results", [])
+    combined_results_list = raw_results if isinstance(raw_results, list) else []
+
     response = {
         "job_id": str(job_id),
-        "status": str(job.job_status) if hasattr(job, "job_status") else "unknown",
+        "status": str(getattr(job, "job_status", "unknown")),
         "chunks": [],
-        "combined_results": job.combined_results
-        if hasattr(job, "combined_results") and job.combined_results
-        else [],
-        "completed": hasattr(job, "job_status")
-        and job.job_status == JobStatus.FINISHED,
+        "combined_results": combined_results_list,
+        "completed": getattr(job, "job_status", None) == JobStatus.FINISHED,
     }
 
     for chunk in chunks:
@@ -189,7 +194,7 @@ async def get_job_results(
     if include_data and hasattr(job, "combined_results") and job.combined_results:
         response["combined_results_sample"] = []
         # Include first 2 items as sample
-        for i, result in enumerate(job.combined_results[:2]):
+        for i, result in enumerate(combined_results_list[:2]):
             sample = {
                 "index": i,
                 "has_row": "row" in result,
@@ -594,7 +599,7 @@ async def diagnose_job(
         # Analyze chunks
         chunks_analysis = []
         for chunk in chunks:
-            chunk_info = {
+            chunk_info: Dict[str, Any] = {
                 "chunk_index": chunk.chunk_index,
                 "status": str(chunk.status),
                 "has_source_data": hasattr(chunk, "source_data")
