@@ -37,6 +37,8 @@ case "$MODE" in
   docker compose run --rm persister sh -c "cd /api/schemer  && python schemer.py"
   echo "2️⃣  Applying migrations (upgrade head)..."
   docker compose run --rm persister sh -c "cd /api/migrator  && alembic upgrade head"
+  echo "3️⃣  Seeding tables..."
+  docker compose run --rm persister sh -c "cd /api/seeder && python seeder.py"
   echo "✅ Starting services..."
   docker compose up -d
   ;;
