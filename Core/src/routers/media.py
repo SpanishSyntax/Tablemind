@@ -4,13 +4,12 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Form, Query, UploadFile
 from fastapi.responses import FileResponse
-from shared import MediaHandler, MediaUtils, ResponseMedia
+from models import FileTypesEnum
+from shared import CurrentUser, MediaHandler, MediaUtils, ResponseMedia
 from shared_db import get_session
 from shared_schemas import ResponseMessage
 from shared_utils import AccessContext, get_claims
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from models import FileTypesEnum
 
 router = APIRouter(tags=["Archivos"], prefix="/media")
 
@@ -26,9 +25,9 @@ async def get_media(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     return await MediaHandler(
-        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user
+        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user_obj
     ).FileRead(media_id)
 
 
@@ -38,9 +37,9 @@ async def get_all_media(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     return await MediaHandler(
-        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user
+        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user_obj
     ).FileReadAll()
 
 
@@ -62,9 +61,9 @@ async def upload_tabular(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     return await MediaHandler(
-        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user
+        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user_obj
     ).FileCreate(file)
 
 
@@ -83,9 +82,9 @@ async def upload_media(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     return await MediaHandler(
-        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user
+        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user_obj
     ).FileCreate(file)
 
 
@@ -97,9 +96,9 @@ async def edit_media(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     return await MediaHandler(
-        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user
+        db=db, upload_dir=BASE_UPLOAD_DIR, current_user=current_user_obj
     ).FileRename(id=media_id, new_filename=filename)
 
 
