@@ -22,7 +22,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.hash == hash, Prompt_on_db.user_id == self.user
+                    Prompt_on_db.hash == hash, Prompt_on_db.user_id == self.user.id
                 )
             )
             return result.scalar_one_or_none()
@@ -36,7 +36,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user
+                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user.id
                 )
             )
             existing_prompt = result.scalar_one_or_none()
@@ -52,7 +52,7 @@ class PromptDb:
         """Get all promot entries in the database for the user"""
         try:
             result = await self.db.execute(
-                select(Prompt_on_db).where(Prompt_on_db.user_id == self.user)
+                select(Prompt_on_db).where(Prompt_on_db.user_id == self.user.id)
             )
             existing_prompt = result.scalars().all()
             if not existing_prompt:
@@ -89,7 +89,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user
+                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user.id
                 )
             )
             prompt = result.scalar_one_or_none()
@@ -119,7 +119,7 @@ class PromptDb:
         try:
             result = await self.db.execute(
                 select(Prompt_on_db).where(
-                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user
+                    Prompt_on_db.id == id, Prompt_on_db.user_id == self.user.id
                 )
             )
             prompt = result.scalar_one_or_none()
