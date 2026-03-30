@@ -16,19 +16,19 @@ const nextConfig = {
       },
       {
         source: '/api/prompt/:path*',
-        destination: 'http://api_auth:4003/public/prompt/:path*',
+        destination: 'http://api_core:4003/public/prompt/:path*',
       },
       {
         source: '/api/media/:path*',
-        destination: 'http://api_auth:4003/public/media/:path*',
+        destination: 'http://api_core:4003/public/media/:path*',
       },
       {
         source: '/api/job/:path*',
-        destination: 'http://api_auth:4003/public/job/:path*',
+        destination: 'http://api_core:4003/public/job/:path*',
       },
       {
         source: '/api/model/:path*',
-        destination: 'http://api_auth:4003/public/model/:path*',
+        destination: 'http://api_core:4003/public/model/:path*',
       },
       {
         source: '/api/:path*',
