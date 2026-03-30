@@ -1,20 +1,20 @@
 services:
-  # nginx:
-  #   container_name: tablemind_nginx
-  #   image: nginx:latest
-  #   env_file: ./.env
-  #   restart: unless-stopped
-  #   secrets:
-  #     - https_public
-  #     - https_private
-  #   networks:
-  #     - tablemind_nginx
-  #   ports:
-  #     - "${PORT_AUTH}:${PORT_AUTH}"
-  #     - "${PORT_CORE}:${PORT_CORE}"
-  #     - "${PORT_FRONT}:${PORT_FRONT}"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  nginx:
+    container_name: tablemind_nginx
+    image: nginx:latest
+    env_file: ./.env
+    restart: unless-stopped
+    secrets:
+      - https_public
+      - https_private
+    networks:
+      - tablemind_nginx
+    ports:
+      - "${PORT_AUTH}:${PORT_AUTH}"
+      - "${PORT_CORE}:${PORT_CORE}"
+      - "${PORT_FRONT}:${PORT_FRONT}"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
 
   db:
     container_name: tablemind_db
@@ -103,13 +103,13 @@ services:
       - postgres_password
       - fernet_password
     networks:
-      - tablemind_nginx
+      - tablemind_db_net
 
   redis:
     image: redis:latest
     container_name: tablemind_redis
     networks:
-      - tablemind_nginx
+      - tablemind_db_net
     depends_on:
       db:
         condition: service_healthy
@@ -121,8 +121,6 @@ services:
       dockerfile: ./Frontend/Dockerfile
     image: spanishsyntax/apps:tablemind-Front
     env_file: ./.env
-    ports:
-      - "${PORT_FRONT}:3000"
     networks:
       - tablemind_nginx
 

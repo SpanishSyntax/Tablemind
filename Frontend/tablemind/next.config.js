@@ -12,27 +12,27 @@ const nextConfig = {
     return [
       {
         source: '/api/auth/:path*',
-        destination: 'http://api_auth:4002/auth/:path*',
+        destination: 'http://api_auth:4002/public/auth/:path*',
       },
       {
         source: '/api/prompt/:path*',
-        destination: 'http://api_auth:4003/prompt/:path*',
+        destination: 'http://api_auth:4003/public/prompt/:path*',
       },
       {
         source: '/api/media/:path*',
-        destination: 'http://api_auth:4003/media/:path*',
+        destination: 'http://api_auth:4003/public/media/:path*',
       },
       {
         source: '/api/job/:path*',
-        destination: 'http://api_auth:4003/job/:path*',
+        destination: 'http://api_auth:4003/public/job/:path*',
       },
       {
         source: '/api/model/:path*',
-        destination: 'http://api_auth:4003/model/:path*',
+        destination: 'http://api_auth:4003/public/model/:path*',
       },
       {
         source: '/api/:path*',
-        destination: 'http://api_auth:4003/:path*',
+        destination: 'http://api_auth:4003/public/:path*',
       },
     ];
   },
