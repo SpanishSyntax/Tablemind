@@ -1,0 +1,55 @@
+# =================================================
+# Stage 1: Start application
+# =================================================
+FROM python:3.12-slim-bookworm
+RUN apt-get update && apt-get install -y \
+    gcc\
+    g++\
+    libpq-dev\
+    curl\
+    jq\
+    && rm -rf /var/lib/apt/lists/*
+
+# -----------------------------
+# 3. Install the packages
+# -----------------------------
+ARG SHARED=1
+WORKDIR /packages
+
+COPY Packages/shared_db ./shared_db
+COPY Packages/shared_models ./shared_models
+COPY Packages/shared_schemas ./shared_schemas
+COPY Packages/shared_utils ./shared_utils
+COPY Persistence/src/models ./models
+COPY Packages/shared ./shared
+RUN pip install --no-cache-dir /packages/shared_db
+RUN pip install --no-cache-dir /packages/shared_models
+RUN pip install --no-cache-dir /packages/shared_schemas
+RUN pip install --no-cache-dir /packages/shared_utils
+RUN pip install --no-cache-dir /packages/models
+RUN pip install --no-cache-dir /packages/shared
+
+# -----------------------------
+# 4. Copy app
+# -----------------------------
+ARG APPLICATION=1
+WORKDIR /api
+
+COPY Worker/src/pyproject.toml ./pyproject.toml
+RUN pip install --no-cache-dir .
+
+
+COPY Worker/src/main.py ./main.py
+COPY Worker/src/llm.py ./llm.py
+
+# -----------------------------
+# 5. setup entrypoint
+# -----------------------------
+COPY Worker/entrypoint_worker.sh /entrypoint_worker.sh
+RUN chmod +x /entrypoint_worker.sh
+ENTRYPOINT ["/entrypoint_worker.sh"]
+
+# -----------------------------
+# 6. Run uvicorn
+# -----------------------------
+CMD ["sh", "-c", "uvicorn main:api --host 0.0.0.0 --port ${PORT_WORKER:-8000}"]
