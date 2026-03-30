@@ -50,6 +50,8 @@ services:
       - users_file
     networks:
       - tablemind_db_net
+    volumes:
+      - uploads:/app/uploads # Add this
 
   api_auth:
     container_name: tablemind_api_auth
@@ -70,6 +72,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - uploads:/app/uploads # Add this
 
   api_core:
     container_name: tablemind_api_core
@@ -86,6 +90,8 @@ services:
     networks:
       - tablemind_db_net
       - tablemind_nginx
+    volumes:
+      - uploads:/app/uploads # Add this
 
   worker:
     container_name: tablemind_worker
@@ -104,6 +110,8 @@ services:
       - fernet_password
     networks:
       - tablemind_db_net
+    volumes:
+      - uploads:/app/uploads # Add this
 
   redis:
     image: redis:latest
