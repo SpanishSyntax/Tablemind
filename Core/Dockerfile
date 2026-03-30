@@ -39,7 +39,6 @@ COPY Core/src/pyproject.toml ./pyproject.toml
 RUN pip install --no-cache-dir .
 
 COPY Core/src/main.py ./main.py
-COPY Core/src/seed.py ./seed.py
 
 COPY Core/src/routers ./routers
 
