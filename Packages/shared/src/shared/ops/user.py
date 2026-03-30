@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from shared_models import User, UserTier
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from sqlalchemy.orm import selectinload
 
 class UsersDb:
     def __init__(self, db: AsyncSession):
@@ -15,7 +15,7 @@ class UsersDb:
         """Check the username for a user to see if it already exists in the database"""
         try:
             result = await self.db.execute(
-                select(User).where((User.username == username) | (User.email == email))
+                select(User).options(selectinload(User.tier)).where((User.username == username) | (User.email == email))
             )
             return result.scalar_one_or_none()
         except Exception as e:
@@ -27,7 +27,7 @@ class UsersDb:
         """Create an entry in the database for the user"""
         try:
             result = await self.db.execute(
-                select(UserTier).where(UserTier.label == "free")
+                select(UserTier).options(selectinload(User.tier)).where(UserTier.label == "free")
             )
             free_tier = result.scalar_one_or_none()
             if not free_tier:
@@ -53,7 +53,7 @@ class UsersDb:
             )
 
     async def get_user_entry_for_login(self, username: str) -> Optional[User]:
-        result = await self.db.execute(select(User).where(User.username == username))
+        result = await self.db.execute(select(User).options(selectinload(User.tier)).where(User.username == username))
         return result.scalar_one_or_none()
 
     async def get_user_tier(self, user_id: UUID) -> Optional[str]:
@@ -74,7 +74,7 @@ class UsersDb:
 
     async def get_user_entry(self, user_id: UUID) -> Optional[User]:
         """Returns the tier of a user by ID."""
-        result = await self.db.execute(select(User).where(User.id == user_id))
+        result = await self.db.execute(select(User).options(selectinload(User.tier)).where(User.id == user_id))
         return result.scalar_one_or_none()
 
     async def update_user_entry(
@@ -89,7 +89,7 @@ class UsersDb:
     ) -> User:
         """Update fields for a user dynamically if they are provided"""
         try:
-            result = await self.db.execute(select(User).where(User.id == id))
+            result = await self.db.execute(select(User).options(selectinload(User.tier)).where(User.id == id))
             user = result.scalar_one_or_none()
 
             if not user:
