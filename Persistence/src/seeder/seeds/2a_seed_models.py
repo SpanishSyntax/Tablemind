@@ -5,8 +5,7 @@ from enum import Enum
 
 from fastapi import HTTPException
 from shared_db import SessionSync
-from shared_models import User, UserTier
-from shared_utils import encrypt, get_logger, hash_password
+from shared_utils import encrypt, get_logger
 from sqlalchemy import select
 
 from models import APIKey_on_db, Model_on_db
@@ -32,69 +31,6 @@ class LLMProviders(str, Enum):
 
 def upgrade() -> None:
     with SessionSync() as session:
-        """Populate default tiers"""
-        default_tiers = [
-            {
-                "label": "free",
-                "storage_quota": 100_000_000,
-            },
-            {
-                "label": "premium",
-                "storage_quota": 1_000_000_000,
-            },
-            {
-                "label": "admin",
-                "storage_quota": 10_000_000_000,
-            },
-        ]
-        try:
-            for tier in default_tiers:
-                result = session.execute(
-                    select(UserTier).where(UserTier.label == tier["label"])
-                )
-                if not result.scalar_one_or_none():
-                    session.add(UserTier(id=uuid.uuid4(), **tier))
-
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            raise HTTPException(
-                status_code=500, detail=f"Error seedeando db para usertypes: {str(e)}"
-            )
-
-        """Populate default users"""
-        result = session.execute(
-            select(UserTier).where(UserTier.label == "admin")
-        )
-        admin_tier = result.scalar_one_or_none()
-        if not admin_tier:
-            raise HTTPException(status_code=404, detail="El tipo no existe.")
-        default_users = [
-            {
-                "usertier": admin_tier.id,
-                "username": "root",
-                "email": "root@TableMind.com",
-                "password_hash": hash_password(PASS_ROOT_USER),
-                "profile_picture": "",
-                "biography": "",
-                "media_usage": 0,
-            },
-        ]
-        try:
-            for user in default_users:
-                result = session.execute(
-                    select(User).where(User.username == user["username"])
-                )
-                if not result.scalar_one_or_none():
-                    session.add(User(id=uuid.uuid4(), **user))
-
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            raise HTTPException(
-                status_code=500, detail=f"Error seedeando db para users: {str(e)}"
-            )
-
         """Populate models"""
         default_models = [
             {
