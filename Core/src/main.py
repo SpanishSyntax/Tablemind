@@ -9,7 +9,6 @@ from shared_db import SessionAsync, init_db
 from shared_utils import BaseDomainError, configure_logging, get_logger
 
 from routers import router_job, router_media, router_model, router_prompt
-from seed import SeedDb
 
 configure_logging()
 
