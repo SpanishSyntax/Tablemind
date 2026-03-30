@@ -1,6 +1,13 @@
+# Python
 __pycache__/
-.venv
-.ropeproject
-.env
-pyrightconfig.json
-node_modules
+.venv/
+.ruff_cache/
+*.lock
+
+# Secrets
+*.env
+*.sql
+Secrets/
+.aider*
+flake.*
+.direnv
