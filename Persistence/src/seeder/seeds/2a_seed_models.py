@@ -1,4 +1,5 @@
 """Poblado de log action types"""
+
 import os
 import uuid
 from enum import Enum
@@ -27,6 +28,7 @@ class LLMProviders(str, Enum):
     NVIDIA = "NVIDIA"
     AMAZON = "Amazon"
     ANTHROPIC = "Anthropic"
+    DEEPSEEK = "DeepSeek"
 
 
 def upgrade() -> None:
@@ -34,150 +36,71 @@ def upgrade() -> None:
         """Populate models"""
         default_models = [
             {
-                "name": "Google Gemini 2 flash",
+                "name": "Google Gemini 2.0 Flash",
                 "provider": LLMProviders.GOOGLE,
-                "encoder": "gemini-2.5-flash-preview-04-17",
+                "encoder": "gemini-2.0-flash-exp",  # Use 'gemini-2.0-flash' for stable
                 "temperature": 0.1,
                 "top_p": 0.1,
                 "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
+                "cost_per_1m_input": 10,  # $0.10 USD
+                "cost_per_1m_output": 30,  # $0.30 USD
+                "max_input_tokens": 2_097_152,  # 2M context is the new standard
+                "max_output_tokens": 16384,
                 "is_active": True,
             },
             {
-                "name": "OpenAI GPT-4",
+                "name": "OpenAI GPT-5 (Omni)",
                 "provider": LLMProviders.OPENAI,
-                "encoder": "gpt-3.5-turbo",
+                "encoder": "gpt-5",
                 "temperature": 0.1,
                 "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
+                "endpoint_url": "https://api.openai.com/v1/",
+                "cost_per_1m_input": 150,  # $1.50
+                "cost_per_1m_output": 500,  # $5.00
+                "max_input_tokens": 256_000,
+                "max_output_tokens": 8192,
+                "is_active": True,
             },
             {
-                "name": "Meta LLaMA 2 13B",
-                "provider": LLMProviders.META,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "Cohere Command R+",
-                "provider": LLMProviders.COHERE,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "Anthropic Claude 3",
+                "name": "Anthropic Claude 4 Opus",
                 "provider": LLMProviders.ANTHROPIC,
-                "encoder": "gpt-3.5-turbo",
+                "encoder": "claude-4-opus-latest",
                 "temperature": 0.1,
                 "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
+                "endpoint_url": "https://api.anthropic.com/v1/messages",
+                "cost_per_1m_input": 500,  # $5.00
+                "cost_per_1m_output": 1500,  # $15.00
+                "max_input_tokens": 500_000,
+                "max_output_tokens": 12288,
+                "is_active": True,
+            },
+            {
+                "name": "Meta LLaMA 4 405B",
+                "provider": LLMProviders.META,
+                "encoder": "llama-4-405b",
+                "temperature": 0.1,
+                "top_p": 0.1,
+                "endpoint_url": "https://api.groq.com/openai/v1",
+                "cost_per_1m_input": 40,
+                "cost_per_1m_output": 70,
+                "max_input_tokens": 256_000,
+                "max_output_tokens": 4096,
                 "is_active": False,
             },
             {
-                "name": "AI21 Jurassic-1 Jumbo",
-                "provider": LLMProviders.AI21,
-                "encoder": "gpt-3.5-turbo",
+                "name": "DeepSeek-V3 (Coder)",
+                "provider": LLMProviders.DEEPSEEK,
+                "encoder": "deepseek-v3",
                 "temperature": 0.1,
                 "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "Mistral 7B",
-                "provider": LLMProviders.MISTRAL,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "EleutherAI GPT-NeoX 20B",
-                "provider": LLMProviders.ELEUTHERAI,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "Hugging Face Bloom-176B",
-                "provider": LLMProviders.HUGGINGFACE,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "NVIDIA Megatron-Turing NLG 530B",
-                "provider": LLMProviders.NVIDIA,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
-            },
-            {
-                "name": "Amazon Bedrock Titan",
-                "provider": LLMProviders.AMAZON,
-                "encoder": "gpt-3.5-turbo",
-                "temperature": 0.1,
-                "top_p": 0.1,
-                "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 15,  # 0.15 dollars => 15 cents
-                "cost_per_1m_output": 60,  # 0.60 dollars => 60 cents
-                "max_input_tokens": 1_048_576,
-                "max_output_tokens": 65_535,
-                "is_active": False,
+                "endpoint_url": "https://api.deepseek.com/",
+                "cost_per_1m_input": 14,  # Highly aggressive pricing
+                "cost_per_1m_output": 28,
+                "max_input_tokens": 128_000,
+                "max_output_tokens": 8192,
+                "is_active": True,
             },
         ]
-
         try:
             for model in default_models:
                 result = session.execute(
