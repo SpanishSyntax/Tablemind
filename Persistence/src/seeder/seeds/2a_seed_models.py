@@ -36,15 +36,28 @@ def upgrade() -> None:
         """Populate models"""
         default_models = [
             {
-                "name": "Google Gemini 2.0 Flash",
+                "name": "Google Gemini 3 Flash",
                 "provider": LLMProviders.GOOGLE,
-                "encoder": "gemini-2.0-flash-exp",  # Use 'gemini-2.0-flash' for stable
+                "encoder": "gemini-3-flash-preview", 
                 "temperature": 0.1,
                 "top_p": 0.1,
                 "endpoint_url": "https://generativelanguage.googleapis.com/",
-                "cost_per_1m_input": 10,  # $0.10 USD
-                "cost_per_1m_output": 30,  # $0.30 USD
-                "max_input_tokens": 2_097_152,  # 2M context is the new standard
+                "cost_per_1m_input": 10, 
+                "cost_per_1m_output": 30,
+                "max_input_tokens": 1_048_576, # Gemini 3 Flash standard context
+                "max_output_tokens": 16384,
+                "is_active": True,
+            },
+            {
+                "name": "Google Gemini 3.1 Flash-Lite",
+                "provider": LLMProviders.GOOGLE,
+                "encoder": "gemini-3.1-flash-lite-preview",
+                "temperature": 0.1,
+                "top_p": 0.1,
+                "endpoint_url": "https://generativelanguage.googleapis.com/",
+                "cost_per_1m_input": 2.5,  # $0.025 USD - The new budget king
+                "cost_per_1m_output": 30,
+                "max_input_tokens": 1_048_576,
                 "max_output_tokens": 16384,
                 "is_active": True,
             },
@@ -118,7 +131,7 @@ def upgrade() -> None:
 
         """Populate default tiers"""
         result = session.execute(
-            select(Model_on_db).where(Model_on_db.name == "Google Gemini 2.0 Flash")
+            select(Model_on_db).where(Model_on_db.name == "Google Gemini 3 Flash")
         )
         model = result.scalar_one_or_none()
         if not model:
