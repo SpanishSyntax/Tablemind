@@ -79,7 +79,6 @@ class MediaDb:
         """Create an entry in the database for the uploaded file"""
         media = File(
             user_id=owner,
-            created_at=datetime.now(timezone.utc),
             media_type=filetype.label,
             filename=filename,
             filepath=filepath,
