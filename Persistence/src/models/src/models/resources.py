@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, List
 
 from shared_db import Base
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.targets import TargetTable

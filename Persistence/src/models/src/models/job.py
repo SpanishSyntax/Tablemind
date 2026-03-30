@@ -1,17 +1,18 @@
 import uuid
-from enum import Enum
 from datetime import datetime
-from typing import Optional, List, TYPE_CHECKING
+from enum import Enum
+from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import ForeignKey, func, String, DateTime, Enum as PgEnum
+from shared_db import Base
+from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy import Enum as PgEnum
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from models.targets import TargetTable
-from shared_db import Base
 
 if TYPE_CHECKING:
-    from models import Prompt_on_db, Model_on_db
+    from models import Model_on_db, Prompt_on_db
 
 
 class JobStatus(str, Enum):
