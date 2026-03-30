@@ -36,13 +36,13 @@ class SeedDb:
     async def seed_usertypes(self) -> None:
         """Populate default tiers"""
         default_tiers = [
-            {"name": "free", "media_quota": 100_000_000, "price_per_job": 10, "can_use_premium_models": False},
-            {"name": "premium", "media_quota": 1_000_000_000, "price_per_job": 5, "can_use_premium_models": True},
-            {"name": "admin", "media_quota": 10_000_000_000, "price_per_job": 0, "can_use_premium_models": True},
+            {"label": "free", "storage_quota": 100_000_000, "price_per_job": 10, "can_use_premium_models": False},
+            {"label": "premium", "storage_quota": 1_000_000_000, "price_per_job": 5, "can_use_premium_models": True},
+            {"label": "admin", "storage_quota": 10_000_000_000, "price_per_job": 0, "can_use_premium_models": True},
         ]
         try:
             for tier in default_tiers:
-                result = await self.db.execute(select(UserTier).where(UserTier.label == tier["name"]))
+                result = await self.db.execute(select(UserTier).where(UserTier.label == tier["label"]))
                 if not result.scalar_one_or_none():
                     self.db.add(UserTier(id=uuid.uuid4(), **tier))
 
