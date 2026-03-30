@@ -5,7 +5,8 @@ import uuid
 from typing import List, Optional
 
 from fastapi import HTTPException
-from models import Chunk_on_db, GranularityLevel, JobStatus
+from models import Chunk_on_db, FileTypesEnum, GranularityLevel, JobStatus
+from shared_schemas import ResponseMessage
 from shared_utils import decrypt
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,8 +16,6 @@ from shared.schemas import (
     ResponseJob,
 )
 from shared.utils import ChunkUtils, JobUtils, MediaUtils, TextUtils
-from shared_schemas import ResponseMessage
-
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +75,21 @@ class JobHandler:
         handling_fee = self.userdata.tier.priority_level
 
         full_path = os.path.join(self.media.filepath, self.media.filename)
-        self.df = self.jobutils.load_dataframe(full_path, self.media.type.extension)
+
+        try:
+            db_extension = self.media.type.extension 
+            media_enum = FileTypesEnum.from_extension(db_extension)
+            self.df = self.jobutils.load_dataframe(full_path, media_enum)
+    
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=f"Unsupported file extension: {str(e)}")
+
+        if not self.prompt or not self.media or not self.model or not self.userdata:
+            raise HTTPException(
+                status_code=404, detail="No se encontró prompt, media o model"
+            )
+
+        self.df = self.jobutils.load_dataframe(full_path, media_enum)
 
         if granularity == GranularityLevel.PER_CELL and not focus_column:
             raise HTTPException(
