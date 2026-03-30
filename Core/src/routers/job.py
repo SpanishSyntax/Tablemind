@@ -3,14 +3,21 @@ import logging
 import os
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, cast
+from typing import Any, Dict
 
 import pandas as pd
 from celery import Celery
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse
 from models import GranularityLevel, JobStatus
-from shared import FormParams, JobHandler, QueryParams, ResponseJob, ResponseJobStatus
+from shared import (
+    CurrentUser,
+    FormParams,
+    JobHandler,
+    QueryParams,
+    ResponseJob,
+    ResponseJobStatus,
+)
 from shared_db import get_session
 from shared_utils import AccessContext, get_claims
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -37,8 +44,8 @@ async def estimate_job(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
-    return await JobHandler(db=db, current_user=current_user).EstimateJob(
+    current_user_obj = CurrentUser(id=claims["sub"])
+    return await JobHandler(db=db, current_user=current_user_obj).EstimateJob(
         prompt_id=form_params.prompt_id,
         media_id=form_params.media_id,
         model_id=form_params.model_id,
@@ -57,9 +64,9 @@ async def start_job(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     # First estimate the job to get all the required values
-    job_handler = JobHandler(db=db, current_user=current_user)
+    job_handler = JobHandler(db=db, current_user=current_user_obj)
 
     # Estimate the job first to calculate tokens and costs
     job = await job_handler.EstimateJob(
@@ -107,8 +114,8 @@ async def check_job_status(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
-    job_handler = JobHandler(db=db, current_user=current_user)
+    current_user_obj = CurrentUser(id=claims["sub"])
+    job_handler = JobHandler(db=db, current_user=current_user_obj)
     job = await job_handler.JobRead(job_id)
     task_status = "unknown"
     try:
@@ -161,8 +168,8 @@ async def get_job_results(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
-    job_handler = JobHandler(db=db, current_user=current_user)
+    current_user_obj = CurrentUser(id=claims["sub"])
+    job_handler = JobHandler(db=db, current_user=current_user_obj)
 
     job = await job_handler.JobRead(job_id)
     chunks = await job_handler.GetJobChunks(job_id)
@@ -216,6 +223,7 @@ async def download_job_file(
 ):
     claims = get_claims(ctx.access_token)
     current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     """
     Download job results as a file with the same format as the original input file
     """
@@ -223,7 +231,7 @@ async def download_job_file(
         logger.info(f"Starting download for job {job_id}")
 
         # Initialize the job handler
-        job_handler = JobHandler(db=db, current_user=current_user)
+        job_handler = JobHandler(db=db, current_user=current_user_obj)
 
         # Get the job and check its status
         await job_handler.JobRead(job_id)
@@ -573,28 +581,28 @@ async def diagnose_job(
     db: AsyncSession = Depends(get_session),
 ):
     claims = get_claims(ctx.access_token)
-    current_user = claims["sub"]
+    current_user_obj = CurrentUser(id=claims["sub"])
     """
     Diagnostic endpoint for debugging job data structure
 
     Returns detailed information about the job's output data for debugging issues
     """
     try:
-        job_handler = JobHandler(db=db, current_user=current_user)
+        job_handler = JobHandler(db=db, current_user=current_user_obj)
         job = await job_handler.JobRead(job_id)
         chunks = await job_handler.GetJobChunks(job_id)
 
         # Get the job's database entry
         from shared.ops.job import JobDb
 
-        job_db = JobDb(db, current_user)
+        job_db = JobDb(db, current_user_obj)
         original_job = await job_db.get_job_entry(job_id)
 
         # Get file info
         from shared.ops.media import MediaDb
 
         media_db = MediaDb(db)
-        media = await media_db.get_media_entry(original_job.media_id, current_user.id)
+        media = await media_db.get_media_entry(original_job.media_id, claims["sub"])
 
         # Analyze chunks
         chunks_analysis = []
