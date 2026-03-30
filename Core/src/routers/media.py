@@ -49,12 +49,12 @@ async def upload_tabular(
     file: UploadFile = Depends(
         MediaUtils().validate_file(
             allowed_types=[
-                FileTypesEnum.EXCEL_1.value,
-                FileTypesEnum.EXCEL_2.value,
-                FileTypesEnum.OPEN_EXCEL_1.value,
-                FileTypesEnum.OPEN_EXCEL_2.value,
-                FileTypesEnum.CSV.value,
-                FileTypesEnum.TSV.value,
+                FileTypesEnum.EXCEL_1.value[0],
+                FileTypesEnum.EXCEL_2.value[0],
+                FileTypesEnum.OPEN_EXCEL_1.value[0],
+                FileTypesEnum.OPEN_EXCEL_2.value[0],
+                FileTypesEnum.CSV.value[0],
+                FileTypesEnum.TSV.value[0],
             ]
         )
     ),
@@ -73,9 +73,9 @@ async def upload_media(
     file: UploadFile = Depends(
         MediaUtils().validate_file(
             allowed_types=[
-                FileTypesEnum.PNG.value,
-                FileTypesEnum.JPEG.value,
-                FileTypesEnum.MP4.value,
+                FileTypesEnum.PNG.value[0],
+                FileTypesEnum.JPEG.value[0],
+                FileTypesEnum.MP4.value[0],
             ]
         )
     ),
